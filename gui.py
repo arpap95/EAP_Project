@@ -9,6 +9,14 @@ def show_add_form():
     ttk.Label(content_frame, text="Προσθήκη Νέου Ραντεβού").pack(pady=10)
     ttk.Entry(content_frame).pack(pady=5)
     ttk.Button(content_frame, text="Αποθήκευση", command=lambda: show_main_menu()).pack(pady=10)
+    ttk.Button(content_frame, text="Επιστροφή", command=show_main_menu).pack(pady=10)
+
+def customer_management():
+    for widget in content_frame.winfo_children():
+        widget.destroy()
+
+    ttk.Button(content_frame, text="Αποθήκευση", command=lambda: show_main_menu()).pack(pady=10)
+    ttk.Button(content_frame, text="Επιστροφή", command=show_main_menu).pack(pady=10)
 
 
 def show_main_menu():
@@ -16,6 +24,8 @@ def show_main_menu():
         widget.destroy()
 
     ttk.Button(content_frame, text="Προσθήκη Ραντεβού", command=show_add_form).pack(pady=20)
+    ttk.Button(content_frame, text="Διαχείριση Πελατών", command=customer_management).pack(pady=20)
+
 
 
 root = tk.Tk()
