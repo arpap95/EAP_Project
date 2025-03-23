@@ -1,8 +1,6 @@
 import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
 import tkinter as tk
 from tkinter import ttk
-from tkcalendar import Calendar
 
 
 def show_main_menu():
@@ -68,9 +66,9 @@ def addNewClient():
 
     content_frame.configure(bootstyle="dark")
 
-    # Header frame with cleaner styling
+    # Header
     header_frame = ttk.Frame(content_frame, bootstyle="dark")
-    header_frame.pack(fill='x', pady=(10, 20))  # Added padding below header
+    header_frame.pack(fill='x', pady=(10, 20))
 
     # Title in the header
     title = ttk.Label(header_frame, text="Προσθήκη Νέου Πελάτη", font=('Helvetica', 16, 'bold'),
@@ -86,11 +84,11 @@ def addNewClient():
     # Error message variable
     error_var = tk.StringVar(value="")
 
-    # Form frame without any separators
+    # Form frame
     form_frame = ttk.Frame(content_frame, bootstyle="dark")
-    form_frame.pack(fill='both', expand=True, padx=20, pady=0)  # No extra padding
+    form_frame.pack(fill='both', expand=True, padx=20, pady=0)
 
-    # Error message label (initially hidden)
+    # Error message label (hidden)
     error_frame = ttk.Frame(form_frame, bootstyle="dark")
     error_frame.pack(fill='x', pady=(0, 10), side='top')
 
@@ -152,22 +150,10 @@ def addNewClient():
         return None
 
     def customer_exists(name_value, lastname_value, phone_value, email_value):
-        # This is a placeholder function - replace with your actual database check
         # Return True if customer exists, False otherwise
-        # Example implementation:
-        """
-        cursor = connection.cursor()
-        query = "SELECT id FROM customers WHERE (phone = ? OR email = ?) AND name = ? AND lastname = ?"
-        cursor.execute(query, (phone_value, email_value, name_value, lastname_value))
-        result = cursor.fetchone()
-        return result is not None
-        """
-        # For demo, let's check if phone or email already exists in a simulated database
         existing_customers = [
-            {"name": "Γιώργος", "lastname": "Παπαδόπουλος", "phone": "6912345678", "email": "example@mail.com"},
-            # Add more mock data as needed
+            {"name": "Γιώργος", "lastname": "Παπαδόπουλος", "phone": "6912345678", "email": "george@gmail.com"},
         ]
-
         for customer in existing_customers:
             if (customer["phone"] == phone_value or customer["email"] == email_value):
                 return True
@@ -201,8 +187,6 @@ def addNewClient():
         show_main_menu()
 
     def add_customer_to_db(name_value, lastname_value, phone_value, email_value):
-        # This is a placeholder function
-        # Example implementation:
         """
         cursor = connection.cursor()
         query = "INSERT INTO customers (name, lastname, phone, email) VALUES (?, ?, ?, ?)"
@@ -240,9 +224,9 @@ def deleteCustomer():
 
     content_frame.configure(bootstyle="dark")
 
-    # Header frame with cleaner styling
+    # Header
     header_frame = ttk.Frame(content_frame, bootstyle="dark")
-    header_frame.pack(fill='x', pady=(10, 20))  # Added padding below header
+    header_frame.pack(fill='x', pady=(10, 20))
 
     # Title and subtitle in the header
     title = ttk.Label(header_frame, text="Διαγραφή Πελάτη", font=('Helvetica', 16, 'bold'), bootstyle="inverse-dark")
@@ -261,11 +245,11 @@ def deleteCustomer():
 
     # Form frame without any separators or empty labels
     form_frame = ttk.Frame(content_frame, bootstyle="dark")
-    form_frame.pack(fill='both', expand=True, padx=20, pady=0)  # No extra padding
+    form_frame.pack(fill='both', expand=True, padx=20, pady=0)
 
     # Phone input row
     phone_frame = ttk.Frame(form_frame, bootstyle="dark")
-    phone_frame.pack(fill='x', pady=(0, 15))  # Space between fields
+    phone_frame.pack(fill='x', pady=(0, 15))
 
     phone_label = ttk.Label(phone_frame, text="Τηλέφωνο", width=10, bootstyle="inverse-dark")
     phone_label.pack(side='left', padx=5)
@@ -283,13 +267,13 @@ def deleteCustomer():
     email_entry = ttk.Entry(email_frame, textvariable=email, bootstyle="dark")
     email_entry.pack(side='left', padx=5, fill='x', expand=True)
 
-    # Error message label (initially hidden)
+    # Error message label (hidden)
     error_frame = ttk.Frame(form_frame, bootstyle="dark")
     error_frame.pack(fill='x', pady=(5, 10), side='top')
 
     error_label = ttk.Label(error_frame, textvariable=error_var, bootstyle="danger-inverse", font=('Helvetica', 11))
     error_label.pack(fill='x', padx=5)
-    error_label.pack_forget()  # Initially hidden
+    error_label.pack_forget()
 
     # Button container
     button_container = ttk.Frame(form_frame, bootstyle="dark")
@@ -305,7 +289,7 @@ def deleteCustomer():
             error_label.pack(fill='x', padx=5)  # Show error
             return
 
-        # This is a placeholder for demonstration
+        #placeholder
         found = check_customer_exists(phone_value, email_value)
 
         if not found:
@@ -317,21 +301,9 @@ def deleteCustomer():
             show_main_menu()
 
     def check_customer_exists(phone, email):
-        # This is a placeholder function
-        # Return True if customer exists, False otherwise
-        # Example implementation:
-        """
-        cursor = connection.cursor()
-        query = "SELECT id FROM customers WHERE phone = ? OR email = ?"
-        cursor.execute(query, (phone, email))
-        result = cursor.fetchone()
-        return result is not None
-        """
-        return False  # For demonstration - always shows error
+        return False  #demonstration - always shows error
 
     def delete_customer_from_db(phone, email):
-        # This is a placeholder function
-        # Example implementation:
         """
         cursor = connection.cursor()
         query = "DELETE FROM customers WHERE phone = ? OR email = ?"
