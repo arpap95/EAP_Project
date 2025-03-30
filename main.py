@@ -1,6 +1,7 @@
 import ttkbootstrap as ttk
 import tkinter as tk
-from menu import show_main_menu
+from gui_components.menu import show_main_menu
+
 
 root = tk.Tk()
 root.title("Διαχείριση Ραντεβού")
