@@ -1,14 +1,11 @@
-import ttkbootstrap as ttk
 import tkinter as tk
-from menu import show_main_menu
+from gui.app import App
 
-root = tk.Tk()
-root.title("Διαχείριση Ραντεβού")
-root.geometry("800x500")
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Διαχείριση Ραντεβού")
+    root.geometry("800x500")
 
-content_frame = ttk.Frame(root)
-content_frame.pack(fill="both", expand=True)
+    app = App(root)
 
-show_main_menu(content_frame)
-
-root.mainloop()
+    root.mainloop()
