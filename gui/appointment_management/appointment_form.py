@@ -6,51 +6,53 @@ def appointment_management(content_frame):
     for widget in content_frame.winfo_children():
         widget.destroy()
 
-    hdr_txt = "Προσθήκη Νέου Ραντεβού"
-    hdr = ttk.Label(master=content_frame, text=hdr_txt, width=50)
-    hdr.pack(fill='x', pady=10)
+        customer_name = name_entry.get()
+        appointment_date = date_entry.get()
+        appointment_time = time_entry.get()
+        appointment_duration = duration_entry.get()
 
-    # Form variables
-    name = tk.StringVar(value="")
-    lastname = tk.StringVar(value="")
-    phone = tk.StringVar(value="")
-    email = tk.StringVar(value="")
+        if not customer_name or not appointment_date or not appointment_time:
+            messagebox.showerror("Error", "All fields except duration are required!")
+            return
 
-    # Create form entries
-    form_frame = ttk.Frame(content_frame, padding=(20, 10))
-    form_frame.pack(fill='both', expand=True)
+        # Display confirmation message
+        messagebox.showinfo(
+            "Appointment Saved",
+            f"Appointment for {customer_name} on {appointment_date} at {appointment_time} "
+            f"for {appointment_duration} minutes has been saved."
+        )
 
-    # Name entry
-    name_container = ttk.Frame(form_frame)
-    name_container.pack(fill='x', expand=True, pady=5)
-    name_label = ttk.Label(master=name_container, text="Όνομα", width=10)
-    name_label.pack(side='left', padx=5)
-    name_entry = ttk.Entry(master=name_container, textvariable=name)
-    name_entry.pack(side='left', padx=5, fill='x', expand=True)
+    # Create the main window
+    root = tk.Tk()
+    root.title("Create Appointment")
 
-    # Lastname entry
-    lastname_container = ttk.Frame(form_frame)
-    lastname_container.pack(fill='x', expand=True, pady=5)
-    lastname_label = ttk.Label(master=lastname_container, text="Επώνυμο", width=10)
-    lastname_label.pack(side='left', padx=5)
-    lastname_entry = ttk.Entry(master=lastname_container, textvariable=lastname)
-    lastname_entry.pack(side='left', padx=5, fill='x', expand=True)
+    # Customer Name
+    tk.Label(root, text="Customer Name:").grid(row=0, column=0, padx=10, pady=5)
+    name_entry = tk.Entry(root, width=30)
+    name_entry.grid(row=0, column=1, padx=10, pady=5)
 
-    # Phone entry
-    phone_container = ttk.Frame(form_frame)
-    phone_container.pack(fill='x', expand=True, pady=5)
-    phone_label = ttk.Label(master=phone_container, text="Τηλέφωνο", width=10)
-    phone_label.pack(side='left', padx=5)
-    phone_entry = ttk.Entry(master=phone_container, textvariable=phone)
-    phone_entry.pack(side='left', padx=5, fill='x', expand=True)
+    # Appointment Date
+    tk.Label(root, text="Appointment Date (YYYY-MM-DD):").grid(row=1, column=0, padx=10, pady=5)
+    date_entry = tk.Entry(root, width=30)
+    date_entry.grid(row=1, column=1, padx=10, pady=5)
 
-    # Email entry
-    email_container = ttk.Frame(form_frame)
-    email_container.pack(fill='x', expand=True, pady=5)
-    email_label = ttk.Label(master=email_container, text="Email", width=10)
-    email_label.pack(side='left', padx=5)
-    email_entry = ttk.Entry(master=email_container, textvariable=email)
-    email_entry.pack(side='left', padx=5, fill='x', expand=True)
+    # Appointment Time
+    tk.Label(root, text="Appointment Time (HH:MM):").grid(row=2, column=0, padx=10, pady=5)
+    time_entry = tk.Entry(root, width=30)
+    time_entry.grid(row=2, column=1, padx=10, pady=5)
+
+    # Appointment Duration
+    tk.Label(root, text="Duration (minutes, default 30):").grid(row=3, column=0, padx=10, pady=5)
+    duration_entry = tk.Entry(root, width=30)
+    duration_entry.insert(0, "30")  # Default value
+    duration_entry.grid(row=3, column=1, padx=10, pady=5)
+
+    # Save Button
+    save_button = tk.Button(root, text="Save Appointment", command=save_appointment)
+    save_button.grid(row=4, column=0, columnspan=2, pady=20)
+
+    # Run the application
+    root.mainloop()
 
     # Buttons
     button_container = ttk.Frame(form_frame)
