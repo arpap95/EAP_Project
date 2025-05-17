@@ -2,11 +2,13 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from gui.main_menu import show_main_menu
 from utils.database import add_customer_to_db
+from gui.customer_management.customer_menu import customer_menu
 
 def addNewClient(content_frame):
     for widget in content_frame.winfo_children():
         widget.destroy()
 
+    # Ρύθμιση σκούρου φόντου
     content_frame.configure(bootstyle="dark")
 
     # Header
@@ -41,7 +43,7 @@ def addNewClient(content_frame):
 
     # Name input row
     name_frame = ttk.Frame(form_frame, bootstyle="dark")
-    name_frame.pack(fill='x', pady=(0, 15))  # Space between fields
+    name_frame.pack(fill='x', pady=(0, 15))
 
     name_label = ttk.Label(name_frame, text="Όνομα", width=10, bootstyle="inverse-dark")
     name_label.pack(side='left', padx=5)
@@ -110,7 +112,7 @@ def addNewClient(content_frame):
         validation_error = validate_fields()
         if validation_error:
             error_var.set(validation_error)
-            error_label.pack(fill='x', padx=5)  # Show error
+            error_label.pack(fill='x', padx=5)
             return
 
         # Get values from form
@@ -132,8 +134,8 @@ def addNewClient(content_frame):
     # Buttons with styling
     cancel_btn = ttk.Button(
         master=button_container,
-        text="Ακύρωση",
-        command=lambda: show_main_menu(content_frame),
+        text="Επιστροφή",
+        command=lambda: customer_menu(content_frame, lambda: show_main_menu(content_frame)),
         bootstyle="danger",
         width=12
     )

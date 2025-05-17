@@ -2,18 +2,20 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from gui.main_menu import show_main_menu
 from utils.database import delete_customer_from_db
+from gui.customer_management.customer_menu import customer_menu
 
 def deleteCustomer(content_frame):
     for widget in content_frame.winfo_children():
         widget.destroy()
 
+    # Ρύθμιση σκούρου φόντου
     content_frame.configure(bootstyle="dark")
 
     # Header
     header_frame = ttk.Frame(content_frame, bootstyle="dark")
     header_frame.pack(fill='x', pady=(10, 20))
 
-    # Title and subtitle in the header
+    # Title
     title = ttk.Label(header_frame, text="Διαγραφή Πελάτη", font=('Helvetica', 16, 'bold'), bootstyle="inverse-dark")
     title.pack(fill='x', padx=20, pady=(5, 0))
 
@@ -28,7 +30,7 @@ def deleteCustomer(content_frame):
     # Error message variable
     error_var = tk.StringVar(value="")
 
-    # Form frame without any separators or empty labels
+    # Form frame
     form_frame = ttk.Frame(content_frame, bootstyle="dark")
     form_frame.pack(fill='both', expand=True, padx=20, pady=0)
 
@@ -91,8 +93,8 @@ def deleteCustomer(content_frame):
     # Buttons with styling
     cancel_btn = ttk.Button(
         master=button_container,
-        text="Ακύρωση",
-        command=lambda: show_main_menu(content_frame),
+        text="Επιστροφή",
+        command=lambda: customer_menu(content_frame, lambda: show_main_menu(content_frame)),
         bootstyle="danger",
         width=12
     )

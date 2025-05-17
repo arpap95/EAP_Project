@@ -1,13 +1,13 @@
 import ttkbootstrap as ttk
 
 def customer_menu(content_frame, go_back_callback):
-    # Clear the frame
     for widget in content_frame.winfo_children():
         widget.destroy()
 
+    # Ρύθμιση σκούρου φόντου
     content_frame.configure(bootstyle="dark")
 
-    # Main container for labels and buttons
+    # Main container
     lbl_container = ttk.Frame(content_frame, bootstyle="dark")
     lbl_container.pack(fill='x', pady=10, padx=50)
 
@@ -16,7 +16,7 @@ def customer_menu(content_frame, go_back_callback):
 
     from gui.customer_management.add_customer import addNewClient
     from gui.customer_management.delete_customer import deleteCustomer
-    from gui.customer_management.modify_customer import customer_management
+    from gui.customer_management.search_modify_customer import search_modify_customer
 
     lbl_left = ttk.Label(left_section, text='Διαχείριση Πελατών', bootstyle="inverse-dark",
                          font=('Helvetica', 14, 'bold'))
@@ -24,22 +24,17 @@ def customer_menu(content_frame, go_back_callback):
 
     btn_add = ttk.Button(left_section, text="Προσθήκη Πελάτη",
                          command=lambda: addNewClient(content_frame),
-                         bootstyle="secondary", width=20)
+                         bootstyle="secondary", width=23)
     btn_add.pack(pady=5)
-
-    btn_modify = ttk.Button(left_section, text="Τροποποίηση Πελάτη",
-                            command=lambda: customer_management(content_frame),
-                            bootstyle="secondary", width=20)
-    btn_modify.pack(pady=5)
 
     btn_delete = ttk.Button(left_section, text="Διαγραφή Πελάτη",
                             command=lambda: deleteCustomer(content_frame),
-                            bootstyle="secondary", width=20)
+                            bootstyle="secondary", width=23)
     btn_delete.pack(pady=5)
 
-    btn_search = ttk.Button(left_section, text="Αναζήτηση Πελάτη",
-                            command=lambda: customer_management(content_frame),
-                            bootstyle="secondary", width=20)
+    btn_search = ttk.Button(left_section, text="Αναζήτηση/Τροποποίηση Πελάτη",
+                            command=lambda: search_modify_customer(content_frame),
+                            bootstyle="secondary", width=23)
     btn_search.pack(pady=5)
 
     # Bottom frame for "Back" button

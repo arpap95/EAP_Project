@@ -6,37 +6,58 @@ from gui.customer_management.customer_menu import customer_menu
 
 
 def show_main_menu(content_frame):
-    # Clear the frame
     for widget in content_frame.winfo_children():
         widget.destroy()
 
+    # Ρύθμιση σκούρου φόντου
     content_frame.configure(bootstyle="dark")
 
+    ttk.Frame(content_frame, height=40, bootstyle="dark").pack()
+
+    # Title
+    title = ttk.Label(
+        content_frame,
+        text="ΤΑ ΡΑΝΤΕΒΟΥ ΜΟΥ",
+        font=("Helvetica", 26, "bold"),
+        bootstyle="inverse-dark"
+    )
+    title.pack(pady=(20, 40))
+
+    # Line
+    separator = ttk.Separator(content_frame)
+    separator.pack(fill='x', padx=100, pady=10)
+
+    # Space
+    ttk.Frame(content_frame, height=30, bootstyle="dark").pack()
+
+    # Center
     lbl_container = ttk.Frame(content_frame, bootstyle="dark")
-    lbl_container.pack(fill='x', pady=10, padx=50)  # Κεντρική στοίχιση
+    lbl_container.place(relx=0.5, rely=0.5, anchor='center')
 
     left_section = ttk.Frame(lbl_container, bootstyle="dark")
-    left_section.pack(side='left', expand=True)
+    left_section.pack(side='left', padx=35)
 
     right_section = ttk.Frame(lbl_container, bootstyle="dark")
-    right_section.pack(side='right', expand=True)
+    right_section.pack(side='right', padx=35)
 
-    # Customer Management Section
-    lbl_left = ttk.Label(left_section, text='Διαχείριση Πελατών', bootstyle="inverse-dark",
-                         font=('Helvetica', 14, 'bold'))
-    lbl_left.pack(pady=5)
-
-    btn_left = ttk.Button(left_section, text="Διαχείριση Πελατών",
-                          command=lambda: customer_menu(content_frame, lambda: show_main_menu(content_frame)),
-                          bootstyle="secondary", width=20)
+    #Button
+    btn_left = ttk.Button(
+        left_section,
+        text="Διαχείριση Πελατών",
+        command=lambda: customer_menu(content_frame, lambda: show_main_menu(content_frame)),
+        bootstyle="success",
+        width=22,
+        padding=12
+    )
     btn_left.pack(pady=5)
 
-    # Appointment Management Section
-    lbl_right = ttk.Label(right_section, text='Διαχείριση Ραντεβού', bootstyle="inverse-dark",
-                          font=('Helvetica', 14, 'bold'))
-    lbl_right.pack(pady=5)
-
-    btn_right = ttk.Button(right_section, text="Διαχείριση Ραντεβού",
-                           command=lambda: appointment_menu(content_frame, lambda: show_main_menu(content_frame)),
-                           bootstyle="secondary", width=20)
+    #Button
+    btn_right = ttk.Button(
+        right_section,
+        text="Διαχείριση Ραντεβού",
+        command=lambda: appointment_menu(content_frame, lambda: show_main_menu(content_frame)),
+        bootstyle="info",
+        width=22,
+        padding=12
+    )
     btn_right.pack(pady=5)
