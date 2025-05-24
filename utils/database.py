@@ -1,64 +1,201 @@
-def add_customer_to_db(name_value, lastname_value, phone_value, email_value):
-    """
-    Add a new customer to the database.
-
-    In a real application, this would connect to a database.
-    For now, we just print the values.
-
-    Args:
-        name_value (str): Customer's first name
-        lastname_value (str): Customer's last name
-        phone_value (str): Customer's phone number
-        email_value (str): Customer's email address
-    """
-    """
-    cursor = connection.cursor()
-    query = "INSERT INTO customers (name, lastname, phone, email) VALUES (?, ?, ?, ?)"
-    cursor.execute(query, (name_value, lastname_value, phone_value, email_value))
-    connection.commit()
-    """
-    print(f"Adding customer: {name_value} {lastname_value}, {phone_value}, {email_value}")
+from utils.db_connect import *
 
 
-def delete_customer_from_db(phone, email):
+def customer_exists_check(mobile_number: str = None, email: str = None):
     """
-    Delete a customer from the database using phone or email.
+    :param mobile_number:
+    :param email:
+    :return: True if customer exists, else False
+    """
+    mobile_number = str(mobile_number) if mobile_number else None
+    cur = conn.cursor()
+    if mobile_number and email:
+        query = """SELECT customer_id from project.customers where mobile_number = %s OR email = %s"""
+        params = (mobile_number, email)
+    elif mobile_number:
+        query = """SELECT customer_id from project.customers where mobile_number = %s"""
+        params = (mobile_number,)
+    elif email:
+        query = """SELECT customer_id from project.customers where email = %s"""
+        params = (email,)
+    else:
+        return False  # No search criteria given
+    cur.execute(query, params)
+    result = cur.fetchone()
+    # If custoner exists then true
+    if result:
+        return True
+    # else false
+    return False
 
-    In a real application, this would connect to a database.
-    For now, we just print the values.
 
-    Args:
-        phone (str): Customer's phone number
-        email (str): Customer's email address
+def add_customer_to_db(first_name:str, last_name:str, mobile_number:str, email:str)->str:
+    """"
+    A Function to insert Data to project.customers table
+    :param first_name:str
+    :param last_name: str
+    :param mobile_number:str
+    :param email
+    :returns A Successful message upon insertion
     """
-    """
-    cursor = connection.cursor()
-    query = "DELETE FROM customers WHERE phone = ? OR email = ?"
-    cursor.execute(query, (phone, email))
-    connection.commit()
-    """
-    print(f"Deleting customer with phone: {phone} or email: {email}")
+    check = customer_exists_check(mobile_number,email)
+    # If customer does not exists then we will insert
+    if not check :
+        mobile_number = str(mobile_number)
+        cur = conn.cursor()
+        insert_customer_query = f"""
+        insert into project.customers 
+        (first_name,	last_name,	mobile_number,	email)
+        values 
+        ('{first_name}', '{last_name}', '{mobile_number}', '{email}')
+        """
+        cur.execute(insert_customer_query.format(first_name=first_name,last_name=last_name, mobile_number=mobile_number,email=email))
+        conn.commit()
+        conn.close()
+        print (f'{first_name} {last_name} Successfuly inserted to our DB')
+
+    else:
+        print(  f'{first_name} {last_name} Already Exists')
 
 
-def check_customer_exists(phone=None, email=None):
+def delete_customer_from_db(mobile_number:str=None, email:str=None)->str:
     """
-    Check if a customer exists in the database.
+    :param mobile_number:str, optional
+    :param email: str, optional
+    :return: A Successful message upon deletion
+    """
+    mobile_number = str(mobile_number)
+    # Search Criteria from Function arguments
+    if mobile_number and email:
+        query = """select customer_id from project.customers where mobile_number = %s or email = %s"""
+        params = (mobile_number, email)
+    elif mobile_number:
+        query = """select customer_id from project.customers where mobile_number = %s"""
+        params = (mobile_number,)
+    else:
+        query = """select customer_id from project.customers where email = %s"""
+        params = (email,)
 
-    In a real application, this would query a database.
-    For demonstration purposes, this returns False.
+    cur = conn.cursor()
+    cur.execute(query, params)
+    customer_id = cur.fetchone()
+    customer_id = customer_id[0]
 
-    Args:
-        phone (str, optional): Customer's phone number
-        email (str, optional): Customer's email address
+    # Since i know the customer id i delete this person.
+    delete_query = f"""
+    delete from project.customers where customer_id = {customer_id}"""
+    cur.execute(delete_query.format(customer_id=customer_id))
+    conn.commit()
+    conn.close()
 
-    Returns:
-        bool: True if customer exists, False otherwise
+    print ('Customer Deleted successfuly')
+
+
+def search_customer(mobile_number:str=None, email:str=None)->int:
     """
+    :param mobile_number:
+    :param email:
+    :return Customer's Id in order to schedule an appointment : int
     """
-    cursor = connection.cursor()
-    query = "SELECT * FROM customers WHERE phone = ? OR email = ?"
-    cursor.execute(query, (phone, email))
-    result = cursor.fetchone()
-    return result is not None
+    mobile_number = str(mobile_number)
+    # Search Criteria from Function arguments
+    if mobile_number and email:
+        query = """select customer_id from project.customers where mobile_number = %s or email = %s"""
+        params = (mobile_number, email)
+    elif mobile_number:
+        query = """select customer_id from project.customers where mobile_number = %s"""
+        params = (mobile_number,)
+    else:
+        query = """select customer_id from project.customers where email = %s"""
+        params = (email,)
+
+    cur = conn.cursor()
+    cur.execute(query, params)
+    customer_id = cur.fetchone()
+    customer_id = customer_id[0]
+    return  customer_id # no need to close connection. Return does it for us.
+
+
+def add_appointment(appointment_date:str, start_time:str, end_time:str, mobile_number:str=None, email:str=None)->None:
+    # Search customer ids
+    customer_id = search_customer(mobile_number,email)
+
+    insert_query_appointment = f"""
+    insert into project.appointments 
+    (customer_id, appointment_date,	start_time,	end_time)
+    values 
+    ('{customer_id}', '{appointment_date}', '{start_time}', '{end_time}')
     """
-    return False  # For demonstration
+
+    cur = conn.cursor()
+    cur.execute(insert_query_appointment.format(customer_id=customer_id,appointment_date=appointment_date,start_time=start_time,end_time=end_time))
+    conn.commit()
+    conn.close()
+
+
+def appointment_check(appointment_date:str, start_time:str,end_time:str):
+    search_query = f"""
+with customer_details as 
+(
+	    select 
+            concat(b.first_name, ' ', b.last_name) as Name,
+            a.appointment_date,
+            a.start_time,
+            a.end_time
+    from project.appointments a
+    join 
+        project.customers b 
+            on  b.customer_id = a.customer_id 
+    where 
+        a.appointment_date = '{appointment_date}'
+    and a.start_time = '{start_time}'
+    and a.end_time = '{end_time}'
+)
+select 
+		count(*)
+from project.appointments a 
+join 
+	customer_details b 
+		on	b.appointment_date = a.appointment_date 
+		and b.start_time = a.start_time 
+		and b.end_time = a.end_time
+-- an gyrise 1 tote exoume conflict sta rantevou 
+-- allios den exoume 
+    """
+
+
+
+
+
+
+
+
+
+
+
+# Customers
+#add_customer_to_db('nikos', 'mitro', 123456789, 'jdkwjdkdjw@gmail.com')
+#delete_customer_from_db(mobile_number=123456789)
+#customer_exists_check(mobile_number=123456789)
+
+
+
+
+# Appointments
+#add_appointment('2025-01-01', '18:00', '18:30', mobile_number=123456789)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
