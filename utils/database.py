@@ -135,7 +135,9 @@ def add_appointment(appointment_date:str, start_time:str, end_time:str, mobile_n
 
 def appointment_check(appointment_date:str, start_time:str,end_time:str):
     search_query = f"""
-    select 
+with customer_details as 
+(
+	    select 
             concat(b.first_name, ' ', b.last_name) as Name,
             a.appointment_date,
             a.start_time,
@@ -145,9 +147,20 @@ def appointment_check(appointment_date:str, start_time:str,end_time:str):
         project.customers b 
             on  b.customer_id = a.customer_id 
     where 
-        a.appointment_date = {appointment_date}
-    and a.start_time = {start_time}
-    and a.end_time = {end_time}
+        a.appointment_date = '{appointment_date}'
+    and a.start_time = '{start_time}'
+    and a.end_time = '{end_time}'
+)
+select 
+		count(*)
+from project.appointments a 
+join 
+	customer_details b 
+		on	b.appointment_date = a.appointment_date 
+		and b.start_time = a.start_time 
+		and b.end_time = a.end_time
+-- an gyrise 1 tote exoume conflict sta rantevou 
+-- allios den exoume 
     """
 
 
