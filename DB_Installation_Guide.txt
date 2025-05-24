@@ -1,0 +1,62 @@
+1. https://www.postgresql.org/download/ 
+2. Select Latest Version (17)
+3. Select components 
+	* Instead of pgAdmin4, we can use DBeaver.
+	* Do not USE Stack Builder
+4. Passwords 
+	* Password -> admin
+5. Port 5432
+6. Default Locale
+7. Add-ons, tools and utilities 
+	* pgAgent (64bit) for PostgreSQL 17
+8. Installation Details 
+	* Host : localhost
+	* User Name : postgres 
+	* Password : admin 
+	* Port : 5432
+	
+	
+	
+Create a new DataBase : 
+1. DataBase : EAP_Project
+2. Create a New Schema. Name : project
+
+
+
+Create Tables : 
+
+create table project.customers 
+(
+	customer_id serial primary key,
+	first_name varchar(255), 
+	last_name varchar(255),
+	mobile_number varchar(10), 
+	email varchar (255)
+);
+CREATE INDEX customers_email ON project.customers (email);
+
+
+
+create table project.appointments 
+(
+	appointment_id serial primary key,
+	customer_id int, 
+	appointment_date Date,
+	start_time varchar(5), 
+	end_time varchar(5)
+);
+CREATE INDEX appointments_appointment_date ON project.appointments (appointment_date);
+
+
+
+
+Steps to create a env var for Our key.
+1. Open System PROPERTIES ( Edit the system environment Variables)
+2. Click on environment Variables
+3. On system Variables click on the New
+4. On Variable name input PYKEY1 and on Variable value input hZyG3JyB0SwK1d-d594TAq-1ktuHEKbstyfn24iYROs=
+
+
+
+
+
