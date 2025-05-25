@@ -3,7 +3,10 @@ import os
 from cryptography.fernet import Fernet
 from utils.credentials import postgres
 
-key = os.getenv("PYKEY1")
+try : # for  windows
+    key = os.getenv("PYKEY1")
+except: # for mac
+    key = os.environ["PYKEY1"]
 
 
 def encrypt_pwd(pwd, key):
