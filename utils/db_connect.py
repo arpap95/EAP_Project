@@ -36,7 +36,7 @@ try:
     conn = psycopg2.connect(f"dbname='EAP_Project' user='postgres' host='localhost' port = '5432' password={postgres_pwd}")
     print("Connect to Database")
 except:
-    conn = psycopg2.connect(f"dbname='EAP_Project' user='postgres' host='localhost' port = '5433' password={postgres_pwd}")
+    conn = psycopg2.connect(f"dbname='EAP_Project' user='postgres' host='localhost' port = '5433' password='3989'")
 
 
 
