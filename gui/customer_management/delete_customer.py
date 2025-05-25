@@ -1,7 +1,7 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 from gui.main_menu import show_main_menu
-from utils.database import delete_customer_from_db
+import utils.database as db
 from gui.customer_management.customer_menu import customer_menu
 
 def deleteCustomer(content_frame):
@@ -66,8 +66,6 @@ def deleteCustomer(content_frame):
     button_container = ttk.Frame(form_frame, bootstyle="dark")
     button_container.pack(fill='x', pady=(20, 10), side='bottom')
 
-    def check_customer_exists(phone, email):
-        return False  # demonstration - always shows error
 
     def on_submit():
         phone_value = phone.get().strip()
@@ -79,15 +77,15 @@ def deleteCustomer(content_frame):
             error_label.pack(fill='x', padx=5)  # Show error
             return
 
-        # placeholder
-        found = check_customer_exists(phone_value, email_value)
+        # Check if customer Exists
+        found = db.customer_exists_check(mobile_number=phone_value, email=email_value)
 
         if not found:
             error_var.set("Ο πελάτης δεν βρέθηκε")
             error_label.pack(fill='x', padx=5)  # Show error
         else:
             # Delete customer from database
-            delete_customer_from_db(phone_value, email_value)
+            db.delete_customer_from_db(mobile_number=phone_value, email=email_value)
             show_main_menu(content_frame)
 
     # Buttons with styling

@@ -1,7 +1,7 @@
 from utils.db_connect import *
 
 
-def customer_exists_check(mobile_number: str = None, email: str = None):
+def customer_exists_check(mobile_number: str = None, email: str = None)->bool:
     """
     :param mobile_number:
     :param email:
@@ -39,6 +39,7 @@ def add_customer_to_db(first_name:str, last_name:str, mobile_number:str, email:s
     :returns A Successful message upon insertion
     """
     check = customer_exists_check(mobile_number,email)
+    cur = conn.cursor()
     # If customer does not exists then we will insert
     if not check :
         mobile_number = str(mobile_number)
@@ -58,7 +59,7 @@ def add_customer_to_db(first_name:str, last_name:str, mobile_number:str, email:s
         print(  f'{first_name} {last_name} Already Exists')
 
 
-def delete_customer_from_db(mobile_number:str=None, email:str=None)->str:
+def delete_customer_from_db(mobile_number:str=None, email:str=None):
     """
     :param mobile_number:str, optional
     :param email: str, optional
@@ -87,8 +88,6 @@ def delete_customer_from_db(mobile_number:str=None, email:str=None)->str:
     cur.execute(delete_query.format(customer_id=customer_id))
     conn.commit()
     conn.close()
-
-    print ('Customer Deleted successfuly')
 
 
 def search_customer(mobile_number:str=None, email:str=None)->int:
@@ -165,6 +164,65 @@ join
 
 
 
+def get_customer(mobile_number:str=None, email:str=None)->list:
+    mobile_number = str(mobile_number)
+    get_query = f"""
+    select 
+		first_name as name,
+		last_name as lastname,
+		mobile_number as phone,
+		email
+    from project.customers
+    where
+            (
+                mobile_number = '{mobile_number}'
+            or  email = '{email}'
+            )    
+    """
+    cur = conn.cursor()
+    cur.execute(get_query.format(mobile_number=mobile_number, email=email))
+    results = cur.fetchall()
+    return results
+
+
+def update_customer(update_first_name:str, update_last_name:str, update_mobile_number:str, update_email:str, old_mobile_number:str=None, old_email:str=None)->None:
+
+    update_mobile_number = str(update_mobile_number)
+    old_mobile_number = str(old_mobile_number)
+    params = [
+        update_first_name,
+        update_last_name,
+        update_mobile_number,
+        update_email
+    ]
+
+    # 2) Build WHERE clauses & params
+    where_clauses = []
+    if old_mobile_number:
+        where_clauses.append("mobile_number = %s")
+        params.append(old_mobile_number)
+    if old_email:
+        where_clauses.append("email = %s")
+        params.append(old_email)
+    if not where_clauses:
+        raise ValueError("Must provide old_mobile_number and/or old_email to identify the row.")
+
+    where_sql = " AND ".join(where_clauses)
+    update_query = f"""
+        UPDATE project.customers
+        SET
+            first_name    = %s,
+            last_name     = %s,
+            mobile_number = %s,
+            email         = %s
+        WHERE
+            {where_sql}
+    """
+
+    cur = conn.cursor()
+    cur.execute(update_query, tuple(params))
+    conn.commit()
+    print(f"Rows updated: {cur.rowcount}")
 
 
 
@@ -173,16 +231,13 @@ join
 
 
 
-# Customers
-#add_customer_to_db('nikos', 'mitro', 123456789, 'jdkwjdkdjw@gmail.com')
-#delete_customer_from_db(mobile_number=123456789)
-#customer_exists_check(mobile_number=123456789)
 
 
 
 
-# Appointments
-#add_appointment('2025-01-01', '18:00', '18:30', mobile_number=123456789)
+
+
+
 
 
 

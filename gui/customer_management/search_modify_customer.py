@@ -1,5 +1,6 @@
 import tkinter as tk
 import ttkbootstrap as ttk
+import utils.database as db
 from gui.main_menu import show_main_menu
 from gui.customer_management.customer_menu import customer_menu
 
@@ -39,7 +40,6 @@ def search_modify_customer(content_frame):
 
     # Customer found flag
     customer_found = tk.BooleanVar(value=False)
-    customer_data = {}
 
     # Search form frame
     search_form_frame = ttk.Frame(content_frame, bootstyle="dark")
@@ -122,21 +122,11 @@ def search_modify_customer(content_frame):
     email_entry = ttk.Entry(email_frame, textvariable=email, bootstyle="dark")
     email_entry.pack(side='left', padx=5, fill='x', expand=True)
 
-    # Dummy db (replace)
-    def get_customer_from_db(phone_value, email_value):
-        # Fake database
-        customers = [
-            {"id": 1, "name": "Γιώργος", "lastname": "Παπαδόπουλος", "phone": "6912345678",
-             "email": "george@gmail.com"},
-            {"id": 2, "name": "Μαρία", "lastname": "Κωνσταντίνου", "phone": "6987654321", "email": "maria@gmail.com"},
-        ]
-
-        for customer in customers:
-            if customer["phone"] == phone_value or customer["email"] == email_value:
-                return customer
-        return None
 
     def search_customer():
+        # need these values in order to retrieve it on the update statement
+        global phone_value
+        global email_value
         # Hide previous messages and details
         error_label.pack_forget()
         details_frame.pack_forget()
@@ -153,21 +143,24 @@ def search_modify_customer(content_frame):
             return
 
         # Search for customer
-        customer = get_customer_from_db(phone_value, email_value)
+        customer = db.customer_exists_check(mobile_number=phone_value, email=email_value)
 
         if customer:
             # Customer found - show details
             customer_found.set(True)
-            customer_data.clear()
-            customer_data.update(customer)
+            #customer_data.clear()
+            #customer_data.append(customer)
 
-            # Fill the form with customer data
-            name.set(customer["name"])
-            lastname.set(customer["lastname"])
-            phone.set(customer["phone"])
-            email.set(customer["email"])
+            # get details from DB
+            customer_lst = db.get_customer(mobile_number=phone_value, email=email_value)
 
-            error_var.set(f"Πελάτης βρέθηκε: {customer['name']} {customer['lastname']}")
+            # Fill the form with customer data from extracted details
+            name.set(customer_lst[0][0]) # First Name
+            lastname.set(customer_lst[0][1]) # Last Name
+            phone.set(customer_lst[0][2]) # Mobile
+            email.set(customer_lst[0][3]) # Email
+
+            error_var.set(f"Πελάτης βρέθηκε: {customer_lst[0][0]} {customer_lst[0][1]}")
             error_label.configure(bootstyle="success-inverse")
             error_label.pack(fill='x', padx=5)
             details_frame.pack(fill='x', pady=(10, 0))
@@ -202,15 +195,24 @@ def search_modify_customer(content_frame):
         # Get values from form
         name_value = name.get().strip()
         lastname_value = lastname.get().strip()
-        phone_value = phone.get().strip()
-        email_value = email.get().strip()
+        new_phone_value = phone.get().strip()
+        new_email_value = email.get().strip()
+        old_mobile_number = phone_value # global var
+        old_email = email_value # global var
 
-        # εδω θα ενημερωσουμε την βαση
-        # update_customer_in_db(customer_data["id"], name_value, lastname_value, phone_value, email_value)
-
+        # Update Customer Details
+        db.update_customer(
+            update_first_name=name_value,
+            update_last_name=lastname_value,
+            update_mobile_number=new_phone_value,
+            update_email=new_email_value,
+            old_mobile_number=old_mobile_number,
+            old_email=old_email
+        )
         error_var.set("Τα στοιχεία του πελάτη ενημερώθηκαν επιτυχώς!")
         error_label.configure(bootstyle="success-inverse")
         error_label.pack(fill='x', padx=5)
+
 
     # Search button
     search_btn = ttk.Button(

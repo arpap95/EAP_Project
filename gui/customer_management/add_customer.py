@@ -1,7 +1,8 @@
 import tkinter as tk
 import ttkbootstrap as ttk
+import utils.database as db
 from gui.main_menu import show_main_menu
-from utils.database import add_customer_to_db
+#from utils.database import add_customer_to_db
 from gui.customer_management.customer_menu import customer_menu
 
 def addNewClient(content_frame):
@@ -94,16 +95,6 @@ def addNewClient(content_frame):
             return "Παρακαλώ εισάγετε όλα τα στοιχεία"
         return None
 
-    def customer_exists(name_value, lastname_value, phone_value, email_value):
-        # Return True if customer exists, False otherwise
-        existing_customers = [
-            {"name": "Γιώργος", "lastname": "Παπαδόπουλος", "phone": "6912345678", "email": "george@gmail.com"},
-        ]
-        for customer in existing_customers:
-            if (customer["phone"] == phone_value or customer["email"] == email_value):
-                return True
-        return False
-
     def on_submit():
         # Hide any previous error message
         error_label.pack_forget()
@@ -122,13 +113,15 @@ def addNewClient(content_frame):
         email_value = email.get().strip()
 
         # Check if customer exists
-        if customer_exists(name_value, lastname_value, phone_value, email_value):
+        customer_exists = db.customer_exists_check(mobile_number=phone_value, email=email_value)
+
+        if customer_exists:
             error_var.set("Ο πελάτης υπάρχει ήδη")
             error_label.pack(fill='x', padx=5)  # Show error
             return
 
         # If all validations pass, add customer to database
-        add_customer_to_db(name_value, lastname_value, phone_value, email_value)
+        db.add_customer_to_db(first_name=name_value, last_name=lastname_value, mobile_number=phone_value, email=email_value)
         show_main_menu(content_frame)
 
     # Buttons with styling
