@@ -33,10 +33,10 @@ postgres_pwd = postgres['pwd']
 postgres_pwd = decrypt_pwd(postgres_pwd, key)
 
 try:
-    conn = psycopg2.connect(f"dbname='EAP_Project' user='postgres' host='localhost' password={postgres_pwd}")
+    conn = psycopg2.connect(f"dbname='EAP_Project' user='postgres' host='localhost' port = '5432' password={postgres_pwd}")
     print("Connect to Database")
 except:
-    print("I am unable to connect to the database")
+    conn = psycopg2.connect(f"dbname='EAP_Project' user='postgres' host='localhost' port = '5433' password={postgres_pwd}")
 
 
 
