@@ -108,60 +108,15 @@ def search_customer(mobile_number:str=None, email:str=None)->int:
         query = """select customer_id from project.customers where email = %s"""
         params = (email,)
 
-    cur = conn.cursor()
-    cur.execute(query, params)
-    customer_id = cur.fetchone()
-    customer_id = customer_id[0]
-    return  customer_id # no need to close connection. Return does it for us.
+    # open a cursor
+    with conn.cursor() as cur:
+        cur.execute(query, params)
+        row = cur.fetchone()
+    # if customer does not exist return noe
+    if row is None:
+        return None
 
-
-def add_appointment(appointment_date:str, start_time:str, end_time:str, mobile_number:str=None, email:str=None)->None:
-    # Search customer ids
-    customer_id = search_customer(mobile_number,email)
-
-    insert_query_appointment = f"""
-    insert into project.appointments 
-    (customer_id, appointment_date,	start_time,	end_time)
-    values 
-    ('{customer_id}', '{appointment_date}', '{start_time}', '{end_time}')
-    """
-
-    cur = conn.cursor()
-    cur.execute(insert_query_appointment.format(customer_id=customer_id,appointment_date=appointment_date,start_time=start_time,end_time=end_time))
-    conn.commit()
-    conn.close()
-
-
-def appointment_check(appointment_date:str, start_time:str,end_time:str):
-    search_query = f"""
-with customer_details as 
-(
-	    select 
-            concat(b.first_name, ' ', b.last_name) as Name,
-            a.appointment_date,
-            a.start_time,
-            a.end_time
-    from project.appointments a
-    join 
-        project.customers b 
-            on  b.customer_id = a.customer_id 
-    where 
-        a.appointment_date = '{appointment_date}'
-    and a.start_time = '{start_time}'
-    and a.end_time = '{end_time}'
-)
-select 
-		count(*)
-from project.appointments a 
-join 
-	customer_details b 
-		on	b.appointment_date = a.appointment_date 
-		and b.start_time = a.start_time 
-		and b.end_time = a.end_time
--- an gyrise 1 tote exoume conflict sta rantevou 
--- allios den exoume 
-    """
-
+    return row[0]
 
 
 def get_customer(mobile_number:str=None, email:str=None)->list:
