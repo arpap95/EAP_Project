@@ -24,24 +24,24 @@ def customer_menu(content_frame, go_back_callback):
 
     btn_add = ttk.Button(left_section, text="Προσθήκη Πελάτη",
                          command=lambda: addNewClient(content_frame),
-                         bootstyle="secondary", width=23)
+                         bootstyle="secondary", padding=(10, 20), width=30)
     btn_add.pack(pady=5)
 
     btn_delete = ttk.Button(left_section, text="Διαγραφή Πελάτη",
                             command=lambda: deleteCustomer(content_frame),
-                            bootstyle="secondary", width=23)
+                            bootstyle="secondary", padding=(10, 20), width=30)
     btn_delete.pack(pady=5)
 
     btn_search = ttk.Button(left_section, text="Αναζήτηση/Τροποποίηση Πελάτη",
                             command=lambda: search_modify_customer(content_frame),
-                            bootstyle="secondary", width=23)
+                            bootstyle="secondary", padding=(10, 20), width=30)
     btn_search.pack(pady=5)
 
     # Bottom frame for "Back" button
     bottom_frame = ttk.Frame(content_frame, bootstyle="dark")
     bottom_frame.pack(fill='x', side='bottom', pady=10, padx=50)
 
-    btn_back = ttk.Button(bottom_frame, text="Επιστροφή",
+    btn_back = ttk.Button(bottom_frame, text="↩️ Επιστροφή",
                           command=go_back_callback,
                           bootstyle="danger", width=15)
     btn_back.pack(side='right', padx=10)

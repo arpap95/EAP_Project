@@ -45,7 +45,7 @@ def daily_appointments_view(content_frame, go_back_callback):
             show_appointments_for_date(selected_date, main_container)
 
     # Κουμπί για άνοιγμα του date picker
-    date_button = ttk.Button(date_frame, text="Επιλογή Ημερομηνίας",
+    date_button = ttk.Button(date_frame, text="📅 Επιλογή Ημερομηνίας",
                              command=open_date_picker, bootstyle="primary", width=20)
     date_button.pack(pady=10)
 
@@ -53,7 +53,7 @@ def daily_appointments_view(content_frame, go_back_callback):
     bottom_frame = ttk.Frame(content_frame, bootstyle="dark")
     bottom_frame.pack(fill='x', side='bottom', pady=10, padx=50)
 
-    btn_back = ttk.Button(bottom_frame, text="Επιστροφή",
+    btn_back = ttk.Button(bottom_frame, text="↩️ Επιστροφή",
                           command=go_back_callback,
                           bootstyle="danger", width=15)
     btn_back.pack(side='right', padx=10)

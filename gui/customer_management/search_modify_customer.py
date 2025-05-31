@@ -217,7 +217,7 @@ def search_modify_customer(content_frame):
     # Search button
     search_btn = ttk.Button(
         master=search_button_frame,
-        text="Αναζήτηση",
+        text="🔍 Αναζήτηση",
         command=search_customer,
         bootstyle="primary",
         width=12
@@ -244,7 +244,7 @@ def search_modify_customer(content_frame):
     # Buttons with styling
     cancel_btn = ttk.Button(
         master=button_container,
-        text="Επιστροφή",
+        text="↩️ Επιστροφή",
         command=lambda: customer_menu(content_frame, lambda: show_main_menu(content_frame)),
         bootstyle="danger",
         width=12

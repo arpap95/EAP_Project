@@ -46,8 +46,8 @@ def show_main_menu(content_frame):
         text="Διαχείριση Πελατών",
         command=lambda: customer_menu(content_frame, lambda: show_main_menu(content_frame)),
         bootstyle="success",
-        width=22,
-        padding=12
+        padding = (10, 20),
+        width = 30
     )
     btn_left.pack(pady=5)
 
@@ -57,7 +57,7 @@ def show_main_menu(content_frame):
         text="Διαχείριση Ραντεβού",
         command=lambda: appointment_menu(content_frame, lambda: show_main_menu(content_frame)),
         bootstyle="info",
-        width=22,
-        padding=12
+        padding=(10, 20),
+        width=30
     )
     btn_right.pack(pady=5)
