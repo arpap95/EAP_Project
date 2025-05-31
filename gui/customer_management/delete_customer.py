@@ -91,7 +91,7 @@ def deleteCustomer(content_frame):
     # Buttons with styling
     cancel_btn = ttk.Button(
         master=button_container,
-        text="Επιστροφή",
+        text="↩️ Επιστροφή",
         command=lambda: customer_menu(content_frame, lambda: show_main_menu(content_frame)),
         bootstyle="danger",
         width=12
@@ -100,7 +100,7 @@ def deleteCustomer(content_frame):
 
     submit_btn = ttk.Button(
         master=button_container,
-        text="Διαγραφή",
+        text="🗑️ Διαγραφή",
         command=on_submit,
         bootstyle="secondary",
         width=12
