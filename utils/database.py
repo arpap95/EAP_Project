@@ -1,4 +1,19 @@
 from utils.db_connect import *
+from utils.credentials import postgres
+
+postgres_pwd = postgres['pwd']
+postgres_pwd = decrypt_pwd(postgres_pwd, key)
+
+
+def get_connection():
+    # Ξαναδημιουργεί—and επιστρέφει—μια καινούργια σύνδεση κάθε φορά.
+    return psycopg2.connect(
+        dbname="EAP_Project",
+        user="postgres",
+        password=postgres_pwd,
+        host="localhost",
+        port="5432"
+        )
 
 
 def customer_exists_check(mobile_number: str = None, email: str = None)->bool:
@@ -8,26 +23,34 @@ def customer_exists_check(mobile_number: str = None, email: str = None)->bool:
     :return: True if customer exists, else False
     """
     mobile_number = str(mobile_number) if mobile_number else None
-    cur = conn.cursor()
-    if mobile_number and email:
-        query = """SELECT customer_id from project.customers where mobile_number = %s OR email = %s"""
-        params = (mobile_number, email)
-    elif mobile_number:
-        query = """SELECT customer_id from project.customers where mobile_number = %s"""
-        params = (mobile_number,)
-    elif email:
-        query = """SELECT customer_id from project.customers where email = %s"""
-        params = (email,)
-    else:
-        return False  # No search criteria given
-    cur.execute(query, params)
-    result = cur.fetchone()
-    # If custoner exists then true
-    if result:
-        return True
-    # else false
-    return False
+    conn = get_connection()
+    cur = None
 
+    try:
+        cur = conn.cursor()
+        if mobile_number and email:
+            query = """
+                SELECT customer_id
+                FROM project.customers
+                WHERE mobile_number = %s OR email = %s
+            """
+            params = (mobile_number, email)
+        elif mobile_number:
+            query = "SELECT customer_id FROM project.customers WHERE mobile_number = %s"
+            params = (mobile_number,)
+        elif email:
+            query = "SELECT customer_id FROM project.customers WHERE email = %s"
+            params = (email,)
+        else:
+            return False  # Δεν δόθηκε κανένα κριτήριο
+
+        cur.execute(query, params)
+        result = cur.fetchone()
+        return bool(result)
+    finally:
+        if cur is not None:
+            cur.close()
+        conn.close()
 
 def add_customer_to_db(first_name:str, last_name:str, mobile_number:str, email:str)->str:
     """"
@@ -92,52 +115,80 @@ def delete_customer_from_db(mobile_number:str=None, email:str=None):
 
 def search_customer(mobile_number:str=None, email:str=None)->int:
     """
-    :param mobile_number:
-    :param email:
-    :return Customer's Id in order to schedule an appointment : int
+    :param mobile_number: str ή None
+    :param email: str ή None
+    :return: customer_id (int) εάν βρεθεί, αλλιώς None
     """
-    mobile_number = str(mobile_number)
-    # Search Criteria from Function arguments
-    if mobile_number and email:
-        query = """select customer_id from project.customers where mobile_number = %s or email = %s"""
-        params = (mobile_number, email)
-    elif mobile_number:
-        query = """select customer_id from project.customers where mobile_number = %s"""
-        params = (mobile_number,)
-    else:
-        query = """select customer_id from project.customers where email = %s"""
-        params = (email,)
-
-    # open a cursor
-    with conn.cursor() as cur:
-        cur.execute(query, params)
-        row = cur.fetchone()
-    # if customer does not exist return noe
-    if row is None:
+    # Αν δεν δόθηκε κανένα κριτήριο, επιστρέφουμε None απευθείας
+    if not mobile_number and not email:
         return None
 
-    return row[0]
+    # Μετατρέπουμε το mobile_number σε string μόνο εάν υπάρχει
+    mobile_number = str(mobile_number) if mobile_number else None
+
+    # Κατασκευάζουμε το query και τα params ανάλογα με τα πεδία
+    if mobile_number and email:
+        query = "SELECT customer_id FROM project.customers WHERE mobile_number = %s OR email = %s"
+        params = (mobile_number, email)
+    elif mobile_number:
+        query = "SELECT customer_id FROM project.customers WHERE mobile_number = %s"
+        params = (mobile_number,)
+    else:
+        query = "SELECT customer_id FROM project.customers WHERE email = %s"
+        params = (email,)
+
+    # Άνοιγμα καινούργιας σύνδεσης
+    conn = get_connection()
+    cur = None
+    try:
+        cur = conn.cursor()
+        cur.execute(query, params)
+        row = cur.fetchone()
+        if row is None:
+            return None
+        return row[0]
+    finally:
+        # Κλείνουμε πρώτα τον cursor (εάν δημιουργήθηκε), μετά το connection
+        if cur is not None:
+            cur.close()
+        conn.close()
 
 
 def get_customer(mobile_number:str=None, email:str=None)->list:
-    mobile_number = str(mobile_number)
-    get_query = f"""
-    select 
-		first_name as name,
-		last_name as lastname,
-		mobile_number as phone,
-		email
-    from project.customers
-    where
-            (
-                mobile_number = '{mobile_number}'
-            or  email = '{email}'
-            )    
     """
-    cur = conn.cursor()
-    cur.execute(get_query.format(mobile_number=mobile_number, email=email))
-    results = cur.fetchall()
-    return results
+    Επιστρέφει λίστα με (first_name, last_name, mobile_number, email)
+    για τον πελάτη που ταιριάζει είτε στο mobile_number είτε στο email.
+    """
+    # Αν δεν δόθηκε κανένα κριτήριο, επιστρέφουμε κενή λίστα
+    if not mobile_number and not email:
+        return []
+
+    # Βεβαιωνόμαστε ότι μετατρέπουμε το mobile_number σε string αν υπάρχει
+    mobile_number = str(mobile_number) if mobile_number else None
+
+    conn = get_connection()
+    cur = None
+    try:
+        cur = conn.cursor()
+        query = """
+            SELECT
+                first_name AS name,
+                last_name  AS lastname,
+                mobile_number AS phone,
+                email
+            FROM project.customers
+            WHERE
+                (mobile_number = %s OR email = %s)
+        """
+        params = (mobile_number, email)
+        cur.execute(query, params)
+        results = cur.fetchall()
+        return results
+
+    finally:
+        if cur is not None:
+            cur.close()
+        conn.close()
 
 
 def update_customer(update_first_name:str, update_last_name:str, update_mobile_number:str, update_email:str, old_mobile_number:str=None, old_email:str=None)->None:

@@ -1,22 +1,54 @@
 from utils.db_connect import *
-from database import  search_customer
+from utils.database import  *
 
 
 def add_appointment(appointment_date:str, start_time:str, end_time:str, mobile_number:str=None, email:str=None)->None:
     # Search customer ids
-    customer_id = search_customer(mobile_number,email)
+    # 1) Ψάχνουμε πρώτα το customer_id (απ’ τη συνάρτηση search_customer).
+    customer_id = search_customer(mobile_number=mobile_number, email=email)
+    if customer_id is None:
+        raise ValueError("Δεν βρέθηκε πελάτης με αυτά τα στοιχεία.")
 
-    insert_query_appointment = f"""
-    insert into project.appointments 
-    (customer_id, appointment_date,	start_time,	end_time)
-    values 
-    ('{customer_id}', '{appointment_date}', '{start_time}', '{end_time}')
-    """
+    # 2) Άνοιγμα καινούργιας σύνδεσης
+    conn = get_connection()
+    cur = None
+    try:
+        cur = conn.cursor()
 
-    cur = conn.cursor()
-    cur.execute(insert_query_appointment.format(customer_id=customer_id,appointment_date=appointment_date,start_time=start_time,end_time=end_time))
-    conn.commit()
-    conn.close()
+        # 3) Parameterized INSERT (όχι f-string!)
+        insert_sql = """
+            INSERT INTO project.appointments
+            (customer_id, appointment_date, start_time, end_time)
+            VALUES (%s, %s, %s, %s)
+        """
+        params = (customer_id, appointment_date, start_time, end_time)
+        cur.execute(insert_sql, params)
+
+        # 4) Επιβεβαιώνουμε πως έκανε έστω μία εισαγωγή
+        if cur.rowcount == 0:
+            # Αν δεν εισήχθη τίποτα (δεν υπάρχει εξαίρεση αλλά rowcount==0),
+            # μπορούμε να σηκώσουμε ένα custom σφάλμα:
+            raise Exception("Δεν εισήχθη το ραντεβού (rowcount=0).")
+
+        # 5) commit μόλις πετύχει
+        conn.commit()
+
+    except psycopg2.IntegrityError as ie:
+        # rollback σε περίπτωση UNIQUE violation ή άλλου constraint
+        conn.rollback()
+        # Ξαναρίχνουμε την εξαίρεση ώστε ο caller (GUI) να μπορεί να τη χειριστεί
+        raise
+
+    except Exception:
+        # rollback σε κάθε άλλο σφάλμα προτού το ξαναρίξουμε
+        conn.rollback()
+        raise
+
+    finally:
+        # 6) Κλείνουμε cursor και connection
+        if cur is not None:
+            cur.close()
+        conn.close()
 
 
 def display_appointment_user(mobile_number:str=None, email:str=None)->list:
@@ -59,13 +91,14 @@ def display_appointment_date(appointment_date)->list:
                 b.last_name,
                 a.appointment_date ,
                 a.start_time,
-                a.end_time 
+                a.end_time,
+                b.email 
         from project.appointments a 
         join 
             project.customers b 
                 on	b.customer_id = a.customer_id 
         where 
-            appointment_date = '{appointment_date}'
+            appointment_date::date = '{appointment_date}'
     """
     with conn.cursor() as cur:
         cur.execute(query, (appointment_date,))
