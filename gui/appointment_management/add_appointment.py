@@ -3,7 +3,8 @@ import ttkbootstrap as ttk
 import utils.database as db
 from ttkbootstrap.dialogs import DatePickerDialog
 from datetime import datetime, timedelta
-
+import utils.database_appointment as db_appoint
+from ttkbootstrap import Querybox
 
 def add_appointment(content_frame, go_back_callback):
     # Καθαρισμός του frame
@@ -146,24 +147,25 @@ def add_appointment(content_frame, go_back_callback):
     notes_entry.pack(side='left', padx=5, fill='x', expand=True)
 
     def open_date_picker():
-        """Άνοιγμα του date picker dialog"""
+        """Άνοιγμα του date picker dialog και λήψη επιλεγμένης ημερομηνίας."""
         today = datetime.now()
-        picker = DatePickerDialog(
+
+        # Δημιουργούμε και εμφανίζουμε αμέσως το DatePickerDialog
+        chosen_date = Querybox.get_date(
             parent=content_frame,
             title="Επιλογή Ημερομηνίας",
-            firstweekday=0,  # Δευτέρα πρώτη μέρα
+            firstweekday=0,    # 0 = Δευτέρα πρώτη μέρα της εβδομάδας
             startdate=today,
             bootstyle="primary"
         )
-        picker.date_selected.bind(on_date_selected)
-        picker.show()
 
-    def on_date_selected(event):
-        """Callback όταν επιλεγεί ημερομηνία"""
-        date_obj = event.widget.date_selected.get()
-        if date_obj:
-            formatted_date = date_obj.strftime("%d/%m/%Y")
-            selected_date.set(formatted_date)
+        if chosen_date:
+            on_date_selected(chosen_date)
+
+    def on_date_selected(date_obj):
+        """Callback όταν επιλεγεί ημερομηνία (λαμβάνει datetime.date)."""
+        formatted_date = date_obj.strftime("%d/%m/%Y")
+        selected_date.set(formatted_date)
 
     def calculate_end_time(start_time_str):
         """Υπολογισμός ώρας λήξης (προσθήκη 30 λεπτών)"""
@@ -187,6 +189,8 @@ def add_appointment(content_frame, go_back_callback):
     date_button.configure(command=open_date_picker)
 
     def search_customer():
+        global phone_value
+        global email_value
         """Αναζήτηση πελάτη στη βάση δεδομένων"""
         # Hide previous messages and appointment form
         error_label.pack_forget()
@@ -290,6 +294,7 @@ def add_appointment(content_frame, go_back_callback):
         try:
             # Save appointment to database
             # Εδώ θα πρέπει να καλέσεις τη συνάρτηση της βάσης δεδομένων για αποθήκευση ραντεβού ΝΙΚΟ ΚΑΙ ΔΗΜΗΤΡΗ
+            db_appoint.add_appointment(appointment_date=appointment_date,start_time=appointment_start_time,end_time=appointment_end_time,mobile_number=phone_value, email=email_value )
 
             # Show success message
             error_var.set(
@@ -300,11 +305,29 @@ def add_appointment(content_frame, go_back_callback):
             # Clear form after successful save
             clear_appointment_form()
 
-        except Exception as e:
+
+        except ValueError as ve:
+            # Χειριζόμαστε σφάλματα τύπου ValueError (π.χ. «Δεν βρέθηκε πελάτης…» που ρίχνει η helper)
             # Show error message
-            error_var.set(f"Σφάλμα κατά την αποθήκευση: {str(e)}")
+            error_var.set(str(ve))
             error_label.configure(bootstyle="danger-inverse")
             error_label.pack(fill='x', padx=5)
+
+        except psycopg2.IntegrityError as ie:
+            # Π.χ. διπλό insert με ίδιες συναρτήσεις/κλειδιά (αν υπάρχουν μοναδικοί περιορισμοί)
+            error_var.set("Το ραντεβού υπάρχει ήδη ή παραβιάζει κανόνες μοναδικότητας.")
+            error_label.configure(bootstyle="danger-inverse")
+            error_label.pack(fill='x', padx=5)
+
+        except Exception as e:
+            # Άλλα απρόβλεπτα σφάλματα
+            error_var.set(f"Σφάλμα κατά την αποθήκευση: {e}")
+            error_label.configure(bootstyle="danger-inverse")
+            error_label.pack(fill='x', padx=5)
+        finally:
+            # Ενεργοποιούμε ξανά το κουμπί (είτε πετύχαμε είτε πέσαμε σε exception)
+            save_btn.configure(state="normal")
+            save_btn.update()
 
     def clear_appointment_form():
         """Καθαρισμός της φόρμας ραντεβού"""

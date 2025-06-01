@@ -61,8 +61,8 @@ def sent_email(email_subject: str,send_to: str,cc: str = None,bcc: str = None, c
 
 """
     Example 
-sent_email(email_subject="Hello from Python!", send_to="mitrop.nikos@gmail.com",cc=None, bcc=None,content_plain="This is a test. dwdwdwdwdjwkjdwjdwkdkw",\
-           content_html="<p>This is a <strong>test</strong>.</p>",attach_dir=None,attach_files=None)
+sent_email(email_subject="******", send_to="i",cc=None, bcc=None,content_plain="Υπενθύμιση Ραντεβου",\
+           content_html="None",attach_dir=None,attach_files=None)
 """
 
 
