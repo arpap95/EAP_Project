@@ -32,9 +32,5 @@ def decrypt_pwd(pwd, key):
 postgres_pwd = postgres['pwd']
 postgres_pwd = decrypt_pwd(postgres_pwd, key)
 
-try:
-    conn = psycopg2.connect(f"dbname='EAP_Project' user='postgres' host='localhost' port = '5432' password={postgres_pwd}")
-    print("Connect to Database")
-except: # for Art
-    conn = psycopg2.connect(f"dbname='EAP_Project' user='postgres' host='localhost' port = '5433' password='3989'")
-    print("Connect to Database")
+conn = psycopg2.connect(f"dbname='EAP_Project' user='postgres' host='localhost' port = '5432' password={postgres_pwd}")
+print("Connect to Database")
