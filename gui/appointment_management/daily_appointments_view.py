@@ -5,8 +5,7 @@ import utils.database_appointment as db_appoint
 import utils.helper as hp
 
 
-
-#ΚΑΝΤΕ ΤΑ ΟΠΩΣ ΘΕΛΕΤΕ ΓΙΑ ΝΑ ΕΜΦΑΝΙΖΟΝΤΑΙ ΟΙ ΕΓΓΡΑΦΕΣ ΑΠΟ ΤΗΝ ΒΑΣΗ
+# ΚΑΝΤΕ ΤΑ ΟΠΩΣ ΘΕΛΕΤΕ ΓΙΑ ΝΑ ΕΜΦΑΝΙΖΟΝΤΑΙ ΟΙ ΕΓΓΡΑΦΕΣ ΑΠΟ ΤΗΝ ΒΑΣΗ
 def show_appointments_for_date(selected_date, container):
     """Εμφάνιση ραντεβού για την επιλεγμένη ημερομηνία"""
     # Εδώ θα προσθέσεις τη λογική για εμφάνιση των ραντεβού ΝΙΚΟ ΚΑΙ ΔΗΜΗΤΡΗ
@@ -64,20 +63,39 @@ def daily_appointments_view(content_frame, go_back_callback):
     )
     date_label.pack(pady=10)
 
+    # Frame για τα κουμπιά (ημερομηνία και email)
+    buttons_frame = ttk.Frame(date_frame, bootstyle="dark")
+    buttons_frame.pack(pady=10)
+
     # Κουμπί που ανοίγει το date picker
     pick_btn = ttk.Button(
-        date_frame,
+        buttons_frame,
         text="Επίλεξε Ημερομηνία",
         bootstyle="warning",
         command=lambda: open_date_picker()
     )
-    pick_btn.pack()
+    pick_btn.pack(side="left", padx=(0, 10))
+
+    # Κουμπί για αποστολή email υπενθυμίσεων
+    email_btn = ttk.Button(
+        buttons_frame,
+        text="📧 Αποστολή Email Υπενθυμίσεων",
+        bootstyle="info",
+        state="disabled",  # Αρχικά απενεργοποιημένο
+        command=lambda: send_email_reminders()
+    )
+    email_btn.pack(side="left")
 
     # Container όπου θα εμφανιστούν τα ραντεβού
     appointments_container = ttk.Frame(main_container, bootstyle="dark")
     appointments_container.pack(fill="both", expand=True, pady=(10, 0))
 
+    # Μεταβλητή για να κρατάμε την επιλεγμένη ημερομηνία
+    current_selected_date = None
+
     def open_date_picker():
+        nonlocal current_selected_date
+
         # Άνοιγμα DatePickerDialog (επιστρέφει datetime.date)
         date_dialog = DatePickerDialog(bootstyle="warning")
         selected_date = date_dialog.date_selected
@@ -85,9 +103,15 @@ def daily_appointments_view(content_frame, go_back_callback):
         if not selected_date:
             return
 
+        # Αποθήκευση της επιλεγμένης ημερομηνίας
+        current_selected_date = selected_date
+
         # 1) Εμφάνιση σε ελληνική μορφή
         formatted_date = selected_date.strftime("%d/%m/%Y")
         selected_date_var.set(f"Επιλεγμένη ημερομηνία: {formatted_date}")
+
+        # Ενεργοποίηση του κουμπιού email
+        email_btn.configure(state="normal")
 
         # 2) Καθαρίζουμε προηγούμενα ραντεβού
         for w in appointments_container.winfo_children():
@@ -145,23 +169,25 @@ def daily_appointments_view(content_frame, go_back_callback):
             )
 
         tree.pack(fill="both", expand=True, pady=5, padx=5)
-        # de-duplication of email - addresses
-        seen = set()
-        emails = []
 
-        for i in rows: # rows = results from DB
-            email = i[-1] # last column from DB
-            if email not in seen :
-                seen.add(email)
-                emails.append(email)
+    def send_email_reminders():
+        """Συνάρτηση για αποστολή email υπενθυμίσεων - εδώ θα προσθέσετε τη λογική σας"""
+        if current_selected_date is None:
+            return
 
-        for user in emails:
-            hp.sent_email(email_subject=f"Υπενθύμιση Ραντεβου για ημερα : {db_date_str}", send_to=user, cc=None, bcc=None,
-                          content_plain="Υπενθύμιση Ραντεβου",
-                          content_html=None,
-                          attach_dir=None,
-                          attach_files=None
-                          )
+        # Εδώ θα προσθέσετε τη λογική για αποστολή emails
+        # Για παράδειγμα:
+        # db_date_str = current_selected_date.strftime("%Y-%m-%d")
+        # rows = db_appoint.display_appointment_date(db_date_str)
+        # ... λογική αποστολής emails ...
 
+        print(f"Αποστολή email υπενθυμίσεων για την ημερομηνία: {current_selected_date}")
 
+    # Bottom frame για τα κουμπιά
+    bottom_frame = ttk.Frame(content_frame, bootstyle="dark")
+    bottom_frame.pack(fill='x', side='bottom', pady=10, padx=50)
 
+    btn_back = ttk.Button(bottom_frame, text="↩️ Επιστροφή",
+                          command=go_back_callback,
+                          bootstyle="danger", width=15)
+    btn_back.pack(side='right', padx=10)
