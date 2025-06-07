@@ -59,22 +59,22 @@ def display_appointment_user(mobile_number:str=None, email:str=None)->list:
     """
     customer_id = search_customer(mobile_number, email)
     display_query = f"""
-    select 
-		a.appointment_id,
-		b.first_name,
-		b.last_name,
-		b.email,
-		b.customer_id,
-		a.appointment_date ,
-		a.start_time,
-		a.end_time 
-from project.appointments a 
-join 
-	project.customers b 
-		on	b.customer_id = a.customer_id 
-where 
-	b.customer_id = '{customer_id}'
-    """
+                select 
+                    a.appointment_id,
+                    b.first_name,
+                    b.last_name,
+                    b.email,
+                    b.customer_id,
+                    a.appointment_date ,
+                    a.start_time,
+                    a.end_time 
+            from project.appointments a 
+            join 
+                project.customers b 
+                    on	b.customer_id = a.customer_id 
+            where 
+                b.customer_id = '{customer_id}'
+                """
     with conn.cursor() as cur:
         cur.execute(display_query, (customer_id,))
         rows = cur.fetchall()
@@ -115,10 +115,15 @@ def delete_appointment(appointment_id):
     where 
         appointment_id = '{appointment_id}'
     """
+    conn = get_connection()
     cur = conn.cursor()
-    cur.execute(delete_query.format(appointment_id=appointment_id))
-    conn.commit()
-    conn.close()
+    try:
+        cur.execute(delete_query.format(appointment_id=appointment_id))
+        conn.commit()
+    finally:
+        cur.close()
+        conn.close()
+
 
 
 def update_appoinment(appointment_id, new_start_time, new_end_time, new_appointment_date):
@@ -131,10 +136,15 @@ def update_appoinment(appointment_id, new_start_time, new_end_time, new_appointm
             where 
                 appointment_id = {appointment_id}
     """
+    conn = get_connection()
     cur = conn.cursor()
-    cur.execute(update_query.format(appointment_id=appointment_id,new_start_time=new_start_time,new_end_time=new_end_time,new_appointment_date=new_appointment_date))
-    conn.commit()
-    conn.close()
+    try:
+        cur.execute(update_query.format(appointment_id=appointment_id,new_start_time=new_start_time,new_end_time=new_end_time,new_appointment_date=new_appointment_date))
+        conn.commit()
+    finally:
+        cur.close()
+        conn.close()
+
 
 
 
