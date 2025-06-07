@@ -2,7 +2,7 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs import DatePickerDialog, Messagebox
 from datetime import datetime
-
+import utils.database_appointment as db_appoint
 
 def edit_appointment_window(parent, appointment_data, customer_data):
     """
@@ -252,31 +252,33 @@ def edit_appointment_window(parent, appointment_data, customer_data):
 
     def update_appointment_in_database(old_data, new_data):
         """
-        Ενημέρωση ραντεβού στη βάση δεδομένων
-        ΕΔΩ ΘΑ ΒΑΛΕΤΕ ΤΗ ΛΟΓΙΚΗ ΣΑΣ ΓΙΑ ΕΝΗΜΕΡΩΣΗ ΣΤΗΝ ΒΑΣΗ ΝΙΚΟ ΚΑΙ ΔΗΜΗΤΡΗ
+        Ενημέρωση ραντεβού στη βάση δεδομένων.
         """
+        # Μετατροπή ημερομηνίας από dd/mm/YYYY σε YYYY-MM-DD
         try:
-            # Προσωρινή λογική για δοκιμή - επιστρέφει πάντα True
-            # Εδώ θα συνδεθείτε με τη βάση δεδομένων και θα ενημερώσετε το ραντεβού
+            day, month, year = new_data['date'].split('/')
+            db_date = f"{year}-{month}-{day}"
+        except Exception:
+            return False
 
-            print(f"Ενημέρωση ραντεβού:")
-            print(f"Παλιά δεδομένα: {old_data}")
-            print(f"Νέα δεδομένα: {new_data}")
+        new_start = new_data['start_time']
+        new_end = new_data['end_time']
+        appointment_id = old_data.get('appointment_id')
+        if not appointment_id:
+            return False
 
-            # Παράδειγμα:
-            # cursor.execute("""
-            #     UPDATE appointments
-            #     SET date = ?, start_time = ?, end_time = ?
-            #     WHERE customer_phone = ? AND date = ? AND start_time = ? AND end_time = ?
-            # """, (new_data['date'], new_data['start_time'], new_data['end_time'],
-            #       new_data['customer_phone'], old_data['date'], old_data['start_time'], old_data['end_time']))
-            #
-            # connection.commit()
-
-            return True  # Προσωρινά επιστρέφουμε True
-
+        try:
+            # Κλήση στην πραγματική συνάρτηση της βάσης
+            db_appoint.update_appoinment(
+                appointment_id,
+                new_start,
+                new_end,
+                db_date
+            )
+            return True
         except Exception as e:
-            print(f"Σφάλμα κατά την ενημέρωση: {e}")
+            # για debugging στο console
+            print(f"Error updating appointment in DB: {e}")
             return False
 
     # Buttons frame

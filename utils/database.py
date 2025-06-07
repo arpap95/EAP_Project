@@ -100,17 +100,22 @@ def delete_customer_from_db(mobile_number:str=None, email:str=None):
         query = """select customer_id from project.customers where email = %s"""
         params = (email,)
 
+    conn = get_connection()
     cur = conn.cursor()
-    cur.execute(query, params)
-    customer_id = cur.fetchone()
-    customer_id = customer_id[0]
+    try:
+        cur.execute(query, params)
+        customer_id = cur.fetchone()
+        customer_id = customer_id[0]
 
-    # Since i know the customer id i delete this person.
-    delete_query = f"""
-    delete from project.customers where customer_id = {customer_id}"""
-    cur.execute(delete_query.format(customer_id=customer_id))
-    conn.commit()
-    conn.close()
+        # Since i know the customer id i delete this person.
+        delete_query = f"""
+        delete from project.customers where customer_id = {customer_id}"""
+        cur.execute(delete_query.format(customer_id=customer_id))
+        conn.commit()
+        conn.close()
+    finally:
+        cur.close()
+        conn.close()
 
 
 def search_customer(mobile_number:str=None, email:str=None)->int:
@@ -225,12 +230,15 @@ def update_customer(update_first_name:str, update_last_name:str, update_mobile_n
             {where_sql}
     """
 
+    conn = get_connection()
     cur = conn.cursor()
-    cur.execute(update_query, tuple(params))
-    conn.commit()
-    print(f"Rows updated: {cur.rowcount}")
-
-
+    try:
+        cur.execute(update_query, tuple(params))
+        conn.commit()
+        print(f"Rows updated: {cur.rowcount}")
+    finally:
+        cur.close()
+        conn.close()
 
 
 

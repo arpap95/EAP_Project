@@ -3,6 +3,7 @@ from ttkbootstrap.dialogs import DatePickerDialog
 from datetime import datetime
 import utils.database_appointment as db_appoint
 import utils.helper as hp
+import tkinter.messagebox as mbox
 
 
 # ΚΑΝΤΕ ΤΑ ΟΠΩΣ ΘΕΛΕΤΕ ΓΙΑ ΝΑ ΕΜΦΑΝΙΖΟΝΤΑΙ ΟΙ ΕΓΓΡΑΦΕΣ ΑΠΟ ΤΗΝ ΒΑΣΗ
@@ -171,17 +172,59 @@ def daily_appointments_view(content_frame, go_back_callback):
         tree.pack(fill="both", expand=True, pady=5, padx=5)
 
     def send_email_reminders():
-        """Συνάρτηση για αποστολή email υπενθυμίσεων - εδώ θα προσθέσετε τη λογική σας"""
+        """Στέλνει email υπενθυμίσεων σε όλους τους πελάτες της επιλεγμένης ημερομηνίας."""
         if current_selected_date is None:
             return
 
-        # Εδώ θα προσθέσετε τη λογική για αποστολή emails
-        # Για παράδειγμα:
-        # db_date_str = current_selected_date.strftime("%Y-%m-%d")
-        # rows = db_appoint.display_appointment_date(db_date_str)
-        # ... λογική αποστολής emails ...
+        # 1) Μετατροπή σε SQL format
+        db_date_str = current_selected_date.strftime("%Y-%m-%d")
 
-        print(f"Αποστολή email υπενθυμίσεων για την ημερομηνία: {current_selected_date}")
+        # 2) Φέρνουμε τα ραντεβού (όπως και στο Treeview)
+        rows = db_appoint.display_appointment_date(db_date_str)
+        if not rows:
+            mbox.showinfo("Πληροφορία", "Δεν υπάρχουν ραντεβού για αυτή την ημερομηνία.")
+            return
+
+        # 3) Απενεργοποίησε το κουμπί για να μην το πατήσει ξανά
+        email_btn.configure(state="disabled")
+        email_btn.update()
+
+        errors = []
+        for first, last, apt_date, start, end, to_email in rows:
+            # Format ημερομηνίας για το email
+            if hasattr(apt_date, "strftime"):
+                display_date = apt_date.strftime("%d/%m/%Y")
+            else:
+                display_date = apt_date
+
+            subject = f"Υπενθύμιση Ραντεβού — {display_date}"
+            body = (
+                f"Γεια σου {first} {last},\n\n"
+                f"Σου υπενθυμίζουμε ότι έχεις ραντεβού την {display_date} "
+                f"από {start} έως {end}.\n\n"
+                "Σε περιμένουμε!\n"
+            )
+
+            try:
+                hp.sent_email(
+                    email_subject=subject,
+                    send_to=to_email,
+                    content_plain=body
+                )
+            except Exception as e:
+                errors.append(f"{to_email}: {e}")
+
+        # 4) Επανενεργοποίηση του κουμπιού
+        email_btn.configure(state="normal")
+
+        # 5) Ανατροφοδότηση χρήστη
+        if errors:
+            mbox.showwarning(
+                "Σφάλματα κατά την αποστολή",
+                "Κάποια email ΔΕΝ στάλθηκαν:\n" + "\n".join(errors)
+            )
+        else:
+            mbox.showinfo("Επιτυχία", "Όλα τα email στάλθηκαν με επιτυχία.")
 
     # Bottom frame για τα κουμπιά
     bottom_frame = ttk.Frame(content_frame, bootstyle="dark")

@@ -3,6 +3,8 @@ import ttkbootstrap as ttk
 from ttkbootstrap.dialogs import DatePickerDialog, Messagebox
 from datetime import datetime
 from gui.appointment_management.appointment_edit import edit_appointment_window
+import utils.database_appointment as db_appoint
+import utils.database as db
 
 
 def customer_appointments_view(content_frame, go_back_callback):
@@ -81,7 +83,7 @@ def customer_appointments_view(content_frame, go_back_callback):
     def search_customer():
         nonlocal current_customer, current_appointments
 
-        # Καθαρισμός προηγούμενων αποτελεσμάτων
+        # 1) Clear previous results
         for widget in results_container.winfo_children():
             widget.destroy()
         error_label.pack_forget()
@@ -89,25 +91,39 @@ def customer_appointments_view(content_frame, go_back_callback):
         phone = search_phone.get().strip()
         email = search_email.get().strip()
 
-        # Έλεγχος αν έχει εισαχθεί τουλάχιστον ένα κριτήριο
         if not phone and not email:
             error_var.set("Παρακαλώ εισάγετε τηλέφωνο ή email")
             error_label.pack(fill='x', padx=5)
             return
 
-        # ΕΔΩ ΘΑ ΒΑΛΕΤΕ ΤΗ ΛΟΓΙΚΗ ΣΑΣ ΓΙΑ ΑΝΑΖΗΤΗΣΗ ΣΤΗΝ ΒΑΣΗ ΝΙΚΟ ΚΑΙ ΔΗΜΗΤΡΗ
-        # Προσωρινή λογική για δοκιμή
-        customer_found = search_customer_in_database(phone, email)
-
-        if not customer_found:
+        # 2) First get the customer_id (int)
+        cid = db.search_customer(phone, email)
+        if not cid:
             error_var.set("Δεν βρέθηκε πελάτης με αυτά τα στοιχεία")
             error_label.pack(fill='x', padx=5)
             current_customer = None
             current_appointments = []
-        else:
-            current_customer = customer_found
-            # Εμφάνιση ραντεβού πελάτη
-            show_customer_appointments(customer_found, results_container)
+            return
+
+        # 3) Then fetch the full row: (first, last, phone, email)
+        rows = db.get_customer(mobile_number=phone, email=email)
+        if not rows:
+            error_var.set("Σφάλμα στη φόρτωση στοιχείων πελάτη")
+            error_label.pack(fill='x', padx=5)
+            return
+
+        first_name, last_name, phone_val, email_val = rows[0]
+
+        # 4) Build a dict so show_customer_appointments can index by keys
+        customer_found = {
+            'name':     first_name,
+            'lastname': last_name,
+            'phone':    phone_val,
+            'email':    email_val
+        }
+
+        current_customer = customer_found
+        show_customer_appointments(current_customer, results_container)
 
     def clear_search():
         """Νέα συνάρτηση για καθαρισμό αναζήτησης"""
@@ -122,18 +138,7 @@ def customer_appointments_view(content_frame, go_back_callback):
         for widget in results_container.winfo_children():
             widget.destroy()
 
-    def search_customer_in_database(phone, email):
-        # ΕΔΩ ΘΑ ΒΑΛΕΤΕ ΤΗ ΣΥΝΔΕΣΗ ΜΕ ΤΗ ΒΑΣΗ ΔΕΔΟΜΕΝΩΝ ΝΙΚΟ ΚΑΙ ΔΗΜΗΤΡΗ
-        # Προσωρινά επιστρέφω δοκιμαστικά δεδομένα
 
-        if phone == "1234567890" or email == "test@test.com":
-            return {
-                'name': 'Γιάννης',
-                'lastname': 'Παπαδόπουλος',
-                'phone': '1234567890',
-                'email': 'test@test.com'
-            }
-        return None
 
     def delete_appointment(appointment_id, appointment_data):
         """Διαγραφή συγκεκριμένου ραντεβού"""
@@ -188,38 +193,7 @@ def customer_appointments_view(content_frame, go_back_callback):
             error_label.configure(bootstyle="danger-inverse")
             error_label.pack(fill='x', padx=5)
 
-    def on_appointment_double_click(event):
-        """Χειρισμός διπλού κλικ σε ραντεβού"""
-        if not current_tree:
-            return
 
-        selection = current_tree.selection()
-        if not selection:
-            return
-
-        # Παίρνουμε τα δεδομένα του επιλεγμένου ραντεβού
-        item = selection[0]
-        values = current_tree.item(item, 'values')
-
-        if values:
-            appointment_data = {
-                'date': values[0],
-                'start_time': values[1],
-                'end_time': values[2]
-            }
-
-            # Επιβεβαίωση διαγραφής
-            result = Messagebox.yesno(
-                title="Επιβεβαίωση Διαγραφής",
-                message=f"Θέλετε να διαγράψετε το ραντεβού:\n\n"
-                        f"Ημερομηνία: {appointment_data['date']}\n"
-                        f"Ώρα έναρξης: {appointment_data['start_time']}\n"
-                        f"Ώρα λήξης: {appointment_data['end_time']}",
-                parent=content_frame
-            )
-
-            if result == "Yes":
-                delete_appointment(item, appointment_data)
 
     def delete_selected_appointment():
         """Διαγραφή επιλεγμένου ραντεβού με κουμπί"""
