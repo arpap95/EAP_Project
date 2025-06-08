@@ -116,7 +116,7 @@ pip install -r requirements.txt
 Αν δεν υπάρχει `requirements.txt`, εγκατάστησε χειροκίνητα:
 
 ```bash
-pip install psycopg2-binary python-dotenv smtplib tk xlsxwriter
+pip install psycopg2-binary python-dotenv smtplib tk xlsxwriter ttkbootstrap
 ```
 
 ### 3. Εκτέλεση Εφαρμογής
@@ -137,4 +137,6 @@ python main.py
 - Αποστολή υπενθυμίσεων μέσω email (SMTP)
 - Εξαγωγή ραντεβού σε Excel (.xlsx)
 - Χρήση γραφικού περιβάλλοντος μέσω `tkinter`
+- Μοντέρνα εμφάνιση GUI με χρήση `ttkbootstrap` (θέματα τύπου Bootstrap)
 
+---
