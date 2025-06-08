@@ -80,7 +80,7 @@ def daily_appointments_view(content_frame, go_back_callback):
     # Κουμπί για αποστολή email υπενθυμίσεων
     email_btn = ttk.Button(
         buttons_frame,
-        text="📧 Αποστολή Email Υπενθυμίσεων",
+        text="📧 Αποστολή Email Υπενθυμίσεων & Εξαγωγή Αναφοράς",
         bootstyle="info",
         state="disabled",  # Αρχικά απενεργοποιημένο
         command=lambda: send_email_reminders()
