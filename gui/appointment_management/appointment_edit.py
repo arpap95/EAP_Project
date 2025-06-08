@@ -230,7 +230,7 @@ def edit_appointment_window(parent, appointment_data, customer_data):
                 result[0] = True  # Επιτυχής ενημέρωση
 
                 # Εμφάνιση μηνύματος επιτυχίας
-                Messagebox.showinfo(
+                Messagebox.show_info(
                     title="Επιτυχία",
                     message="Το ραντεβού ενημερώθηκε επιτυχώς!",
                     parent=edit_window
