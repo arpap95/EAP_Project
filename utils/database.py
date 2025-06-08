@@ -62,24 +62,29 @@ def add_customer_to_db(first_name:str, last_name:str, mobile_number:str, email:s
     :returns A Successful message upon insertion
     """
     check = customer_exists_check(mobile_number,email)
-    cur = conn.cursor()
+    conn = get_connection()
+    try:
     # If customer does not exists then we will insert
-    if not check :
-        mobile_number = str(mobile_number)
         cur = conn.cursor()
-        insert_customer_query = f"""
-        insert into project.customers 
-        (first_name,	last_name,	mobile_number,	email)
-        values 
-        ('{first_name}', '{last_name}', '{mobile_number}', '{email}')
-        """
-        cur.execute(insert_customer_query.format(first_name=first_name,last_name=last_name, mobile_number=mobile_number,email=email))
-        conn.commit()
-        conn.close()
-        print (f'{first_name} {last_name} Successfuly inserted to our DB')
+        if not check :
+            mobile_number = str(mobile_number)
+            cur = conn.cursor()
+            insert_customer_query = f"""
+            insert into project.customers 
+            (first_name,	last_name,	mobile_number,	email)
+            values 
+            ('{first_name}', '{last_name}', '{mobile_number}', '{email}')
+            """
+            cur.execute(insert_customer_query.format(first_name=first_name,last_name=last_name, mobile_number=mobile_number,email=email))
+            conn.commit()
+            conn.close()
+            print (f'{first_name} {last_name} Successfuly inserted to our DB')
 
-    else:
-        print(  f'{first_name} {last_name} Already Exists')
+        else:
+            print(f'{first_name} {last_name} Already Exists')
+    finally:
+        cur.close()
+        conn.close()
 
 
 def delete_customer_from_db(mobile_number:str=None, email:str=None):

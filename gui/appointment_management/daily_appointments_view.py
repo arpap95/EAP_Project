@@ -4,7 +4,7 @@ from datetime import datetime
 import utils.database_appointment as db_appoint
 import utils.helper as hp
 import tkinter.messagebox as mbox
-
+from collections import defaultdict
 
 # ΚΑΝΤΕ ΤΑ ΟΠΩΣ ΘΕΛΕΤΕ ΓΙΑ ΝΑ ΕΜΦΑΝΙΖΟΝΤΑΙ ΟΙ ΕΓΓΡΑΦΕΣ ΑΠΟ ΤΗΝ ΒΑΣΗ
 def show_appointments_for_date(selected_date, container):
@@ -179,7 +179,7 @@ def daily_appointments_view(content_frame, go_back_callback):
         # 1) Μετατροπή σε SQL format
         db_date_str = current_selected_date.strftime("%Y-%m-%d")
 
-        # 2) Φέρνουμε τα ραντεβού (όπως και στο Treeview)
+        # 2) Φέρνουμε τα ραντεβού from DB
         rows = db_appoint.display_appointment_date(db_date_str)
         if not rows:
             mbox.showinfo("Πληροφορία", "Δεν υπάρχουν ραντεβού για αυτή την ημερομηνία.")
@@ -189,20 +189,29 @@ def daily_appointments_view(content_frame, go_back_callback):
         email_btn.configure(state="disabled")
         email_btn.update()
 
-        errors = []
+        appointments_by_email = defaultdict(list)
         for first, last, apt_date, start, end, to_email in rows:
-            # Format ημερομηνίας για το email
-            if hasattr(apt_date, "strftime"):
-                display_date = apt_date.strftime("%d/%m/%Y")
-            else:
-                display_date = apt_date
+            appointments_by_email[to_email].append((first, last, apt_date, start, end))
 
-            subject = f"Υπενθύμιση Ραντεβού — {display_date}"
+        errors = []
+
+        # 2) sent email for unique addresses
+        for to_email, appts in appointments_by_email.items():
+            # Use the first name/last name from the first appointment
+            first, last, _, _, _ = appts[0]
+
+            # Build a little bulleted list of this person's times
+            date_display = (appts[0][2].strftime("%d/%m/%Y")
+                            if hasattr(appts[0][2], "strftime")
+                            else appts[0][2])
+            lines = [f"- {date_display}, {start}–{end}" for *_, start, end in appts]
+
+            subject = f"Υπενθύμιση Ραντεβού — {date_display}"
             body = (
-                f"Γεια σου {first} {last},\n\n"
-                f"Σου υπενθυμίζουμε ότι έχεις ραντεβού την {display_date} "
-                f"από {start} έως {end}.\n\n"
-                "Σε περιμένουμε!\n"
+                    f"Γεια σου {first} {last},\n\n"
+                    "Σου υπενθυμίζουμε τα ραντεβού σου για την ημέρα:\n"
+                    + "\n".join(lines)
+                    + "\n\nΣε περιμένουμε!\n"
             )
 
             try:
@@ -214,15 +223,13 @@ def daily_appointments_view(content_frame, go_back_callback):
             except Exception as e:
                 errors.append(f"{to_email}: {e}")
 
+        # 3) Export files
+        hp.export_appointments_date(appointment_date=db_date_str)
+
         # 4) Επανενεργοποίηση του κουμπιού
         email_btn.configure(state="normal")
-
-        # 5) Ανατροφοδότηση χρήστη
         if errors:
-            mbox.showwarning(
-                "Σφάλματα κατά την αποστολή",
-                "Κάποια email ΔΕΝ στάλθηκαν:\n" + "\n".join(errors)
-            )
+            mbox.showwarning("Σφάλματα", "Κάποια email ΔΕΝ στάλθηκαν:\n" + "\n".join(errors))
         else:
             mbox.showinfo("Επιτυχία", "Όλα τα email στάλθηκαν με επιτυχία.")
 
