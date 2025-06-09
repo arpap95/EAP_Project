@@ -77,7 +77,7 @@ def display_appointment_user(mobile_number:str=None, email:str=None)->list:
                 """
     conn = get_connection()
     try:
-        conn.cursor()
+        cur = conn.cursor()
         cur.execute(display_query, (customer_id,))
         rows = cur.fetchall()
     # if customer id does not exists
