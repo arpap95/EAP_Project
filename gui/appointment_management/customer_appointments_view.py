@@ -175,6 +175,3 @@ def customer_appointments_view(content_frame, go_back_callback):
         ttk.Button(btns, text="✏️ Τροποποίηση", command=edit_selected_appointment, bootstyle="warning").pack(side='left')
         ttk.Button(btns, text="🗑️ Διαγραφή",  command=delete_selected_appointment, bootstyle="danger").pack(side='left', padx=5)
         ttk.Button(btns, text="🔄 Ανανέωση", command=search_customer, bootstyle="secondary").pack(side='left', padx=5)
-
-    # end of customer_appointments_view body
-

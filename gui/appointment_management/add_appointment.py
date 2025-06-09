@@ -293,7 +293,6 @@ def add_appointment(content_frame, go_back_callback):
 
         try:
             # Save appointment to database
-            # Εδώ θα πρέπει να καλέσεις τη συνάρτηση της βάσης δεδομένων για αποθήκευση ραντεβού ΝΙΚΟ ΚΑΙ ΔΗΜΗΤΡΗ
             db_appoint.add_appointment(appointment_date=appointment_date,start_time=appointment_start_time,end_time=appointment_end_time,mobile_number=phone_value, email=email_value )
 
             # Show success message

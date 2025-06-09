@@ -5,17 +5,6 @@ from datetime import datetime
 import utils.database_appointment as db_appoint
 
 def edit_appointment_window(parent, appointment_data, customer_data):
-    """
-    Δημιουργεί νέο παράθυρο για την τροποποίηση ραντεβού
-
-    Args:
-        parent: Γονικό παράθυρο
-        appointment_data: Δεδομένα του ραντεβού προς τροποποίηση
-        customer_data: Δεδομένα του πελάτη
-
-    Returns:
-        True αν το ραντεβού ενημερώθηκε επιτυχώς, False διαφορετικά
-    """
 
     # Δημιουργία νέου παραθύρου
     edit_window = tk.Toplevel(parent)
@@ -212,9 +201,6 @@ def edit_appointment_window(parent, appointment_data, customer_data):
             return
 
         try:
-            # ΕΔΩ ΘΑ ΒΑΛΕΤΕ ΤΗ ΛΟΓΙΚΗ ΓΙΑ ΕΝΗΜΕΡΩΣΗ ΤΗΣ ΒΑΣΗΣ ΔΕΔΟΜΕΝΩΝ
-            # π.χ. db.update_appointment(appointment_id, new_data)
-
             # Νέα δεδομένα ραντεβού
             new_appointment_data = {
                 'date': date_var.get().strip(),
@@ -223,7 +209,6 @@ def edit_appointment_window(parent, appointment_data, customer_data):
                 'customer_phone': customer_data['phone']
             }
 
-            # Προσωρινή λογική - εδώ θα καλέσετε τη συνάρτηση ενημέρωσης της βάσης
             success = update_appointment_in_database(appointment_data, new_appointment_data)
 
             if success:
