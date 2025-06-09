@@ -6,12 +6,8 @@ import utils.helper as hp
 import tkinter.messagebox as mbox
 from collections import defaultdict
 
-# ΚΑΝΤΕ ΤΑ ΟΠΩΣ ΘΕΛΕΤΕ ΓΙΑ ΝΑ ΕΜΦΑΝΙΖΟΝΤΑΙ ΟΙ ΕΓΓΡΑΦΕΣ ΑΠΟ ΤΗΝ ΒΑΣΗ
 def show_appointments_for_date(selected_date, container):
     """Εμφάνιση ραντεβού για την επιλεγμένη ημερομηνία"""
-    # Εδώ θα προσθέσεις τη λογική για εμφάνιση των ραντεβού ΝΙΚΟ ΚΑΙ ΔΗΜΗΤΡΗ
-    # Προς το παρόν, απλώς εμφανίζουμε ένα μήνυμα
-
     # Αφαίρεση προηγούμενων αποτελεσμάτων
     for widget in container.winfo_children():
         if isinstance(widget, ttk.LabelFrame):
@@ -21,8 +17,6 @@ def show_appointments_for_date(selected_date, container):
     results_frame = ttk.LabelFrame(container, text="Ραντεβού", bootstyle="info")
     results_frame.pack(fill='both', expand=True, pady=20)
 
-    # Εδώ θα συνδέσεις ΝΙΚΟ ΚΑΙ ΔΗΜΗΤΡΗ με τη βάση δεδομένων για να πάρεις τα ραντεβού
-    # Προσωρινό μήνυμα
     no_appointments = ttk.Label(results_frame,
                                 text=f"Δεν βρέθηκαν ραντεβού για την {selected_date.strftime('%d/%m/%Y')}",
                                 bootstyle="secondary", font=('Helvetica', 10))
